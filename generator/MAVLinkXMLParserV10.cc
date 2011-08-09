@@ -763,6 +763,26 @@ bool MAVLinkXMLParserV10::generate()
                                                     }
                                                 }
 
+                                                // message length calculation
+                                                unsigned element_multiplier = 1;
+                                                unsigned element_length = 0;
+
+                                                if (fieldType.contains("[")) {
+                                                    element_multiplier = fieldType.split("[").at(1).split("]").first().toInt();
+                                                }
+                                                for (unsigned i=0; i<sizeof(length_map)/sizeof(length_map[0]); i++)
+                                                {
+                                                    if (fieldType.startsWith(length_map[i].prefix)) {
+                                                        element_length = length_map[i].length * element_multiplier;
+                                                        break;
+                                                    }
+                                                }
+                                                if (element_length == 0) {
+                                                    emit parseState(tr("<font color=\"red\">ERROR: Unable to calculate length for %2 near line %1\nAbort.</font>").arg(QString::number(e.lineNumber()), fieldType));
+                                                    return false;
+                                                }
+                                                message_length += element_length;
+
 
                                                 //
                                                 //                                                QString unpackingCode;
