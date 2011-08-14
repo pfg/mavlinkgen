@@ -130,8 +130,9 @@ unsigned itemLength( const QString &s1 )
 
     do {
         if (Ss1.startsWith(length_map[i1].prefix))
+        {
             el1 = length_map[i1].length;
-        else ;
+        }
         i1++;
     } while ( (el1 == 0) && (i1 < i2));
     return el1;
@@ -883,7 +884,7 @@ bool MAVLinkXMLParserV10::generate()
                                         if (fieldList.size() > 1)
                                         {
                                             qStableSort(fieldList.begin(), fieldList.end(), structSort);
-                                        } else ;
+                                        }
 
                                         // struct now sorted, do crc calc for each field
                                         QString fieldCRCstring;
@@ -926,7 +927,7 @@ bool MAVLinkXMLParserV10::generate()
 //                                        QString compact2Send("\n\n#ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS_SMALL\nstatic inline void mavlink_msg_%3_send(%1 chan%5)\n{\n\t%2 hdr;\n\tmavlink_%3_t payload;\n\tuint16_t checksum;\n\tmavlink_%3_t *p = &payload;\n\n%6\n\thdr.STX = MAVLINK_STX;\n\thdr.len = MAVLINK_MSG_ID_%4_LEN;\n\thdr.msgid = MAVLINK_MSG_ID_%4;\n");
                                         QString compact2Send0( "\n#ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS\n" );
                                         QString compact2Send1("static inline void mavlink_msg_%3_send(%1 chan%5)\n{\n\t%2 hdr;\n\tmavlink_%3_t payload;\n\n\tMAVLINK_BUFFER_CHECK_START( chan, MAVLINK_MSG_ID_%4_LEN )\n%6\n\thdr.STX = MAVLINK_STX;\n\thdr.len = MAVLINK_MSG_ID_%4_LEN;\n\thdr.msgid = MAVLINK_MSG_ID_%4;\n");
-                                        QString compact2Send2("\thdr.sysid = mavlink_system.sysid;\n\thdr.compid = mavlink_system.compid;\n\thdr.seq = mavlink_get_channel_status(chan)->current_tx_seq;\n\tmavlink_get_channel_status(chan)->current_tx_seq = hdr.seq + 1;\n\tmavlink_send_mem(chan, (uint8_t *)&hdr.STX, MAVLINK_NUM_HEADER_BYTES );\n");
+                                        QString compact2Send2("\thdr.sysid = mavlink_system.sysid;\n\thdr.compid = mavlink_system.compid;\n\thdr.seq = mavlink_get_channel_status(chan)->current_tx_seq;\n\tmavlink_get_channel_status(chan)->current_tx_seq = hdr.seq + 1;\n\tmavlink_send_mem(chan, (uint8_t *)&hdr.STX, MAVLINK_NUM_HEADER_BYTES );\n\tmavlink_send_mem(chan, (uint8_t *)&payload, sizeof(payload) );\n");
                                         QString compact2Send3("\n\tcrc_init(&hdr.ck);\n\tcrc_calculate_mem((uint8_t *)&hdr.len, &hdr.ck, MAVLINK_CORE_HEADER_LEN);\n\tcrc_calculate_mem((uint8_t *)&payload, &hdr.ck, hdr.len );\n\tcrc_accumulate( 0x%1, &hdr.ck); /// include key in X25 checksum\n\tmavlink_send_mem(chan, (uint8_t *)&hdr.ck, MAVLINK_NUM_CHECKSUM_BYTES);\n\tMAVLINK_BUFFER_CHECK_END\n}\n\n#endif");
                                         QString compact2Send = compact2Send0 + commentSendContainer.arg(messageName.toLower(), commentLines) + compact2Send1.arg(channelType, headerType, messageName, messageName.toUpper(), packParameters, packLines.replace(QString("p->"),QString("payload.")) ) + compact2Send2 + compact2Send3.arg(stringCRC.toUpper());
 //                                        QString cFile = "// MESSAGE " + messageName.toUpper() + " PACKING\n\n" + idDefine.arg(messageName.toUpper(), QString::number(messageId), QString::number(calculatedLength), stringCRC.toUpper() ) + "\n\n" + cStruct + "\n" + arrayDefines + "\n" + commentContainer.arg(messageName.toLower(), commentLines) + pack + commentPackChanContainer.arg(messageName.toLower(), commentLines) + packChan + commentEncodeContainer.arg(messageName.toLower()) + encode + "\n" + commentSendContainer.arg(messageName.toLower(), commentLines) + compactSend + compact2Send + "\n" + "// MESSAGE " + messageName.toUpper() + " UNPACKING\n\n" + unpacking + commentDecodeContainer.arg(messageName.toLower()) + decode;
